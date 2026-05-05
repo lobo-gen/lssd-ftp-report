@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>LSSD Daily Observation Report</title>
 
+<!-- FAVICON -->
+<link rel="icon" type="image/png" href="favicon.png">
+
 <style>
 body {
   font-family: Arial;
@@ -62,7 +65,7 @@ input[type="radio"] {
   width:auto;
 }
 
-/* OPTIONS (RATINGS) */
+/* OPTIONS */
 .option {
   display:flex;
   align-items:center;
@@ -78,6 +81,7 @@ button {
   padding:6px 10px;
   border-radius:4px;
   cursor:pointer;
+  margin-right:5px;
 }
 
 button:hover {
@@ -122,10 +126,19 @@ button:hover {
 
 </div>
 
-<h3>GRADING</h3>
+<h3>GRADING & NARRATIVE</h3>
 
 <div class="section-grid">
 
+<!-- GRADING SYSTEM -->
+<div class="card">
+<h4>Grading System</h4>
+<p><b>S — Superior</b>: Outstanding performance.</p>
+<p><b>C — Competent</b>: Meets standard.</p>
+<p><b>N/I — Needs Improvement</b>: Requires training.</p>
+</div>
+
+<!-- RATING -->
 <div class="card">
 <h4>Overall Performance</h4>
 
@@ -135,23 +148,17 @@ button:hover {
 
 </div>
 
-<div class="card full">
-<h4>Grading System</h4>
-<p><b>S — Superior</b>: Outstanding performance.</p>
-<p><b>C — Competent</b>: Meets standard.</p>
-<p><b>N/I — Needs Improvement</b>: Requires further training.</p>
+<!-- PATROL -->
+<div class="card">
+<h4>Patrol Narrative</h4>
+<textarea id="patrol" rows="6">HH:MM — 
+HH:MM — 
+HH:MM — </textarea>
 </div>
 
 </div>
-
-<h3>NARRATIVES</h3>
 
 <div class="section-grid">
-
-<div class="card full">
-<h4>Patrol Narrative</h4>
-<textarea id="patrol" rows="6"></textarea>
-</div>
 
 <div class="card full">
 <h4>Report Narrative</h4>
@@ -169,6 +176,7 @@ button:hover {
 <br>
 
 <button onclick="generateBBCode()">Generate BBCode</button>
+<button onclick="clearForm()">Clear Form</button>
 
 <h3>Output</h3>
 <textarea id="output" rows="18"></textarea>
@@ -192,7 +200,6 @@ document.querySelectorAll("input, textarea").forEach(el => {
   });
 });
 
-// radios
 document.querySelectorAll('input[type="radio"]').forEach(radio => {
   const name = radio.name;
 
@@ -256,6 +263,27 @@ ${val("report")}
 [/divboxcontent][/departmentmanual]`;
 
 $("output").value = output;
+}
+
+// ================= CLEAR =================
+function clearForm(){
+  if(!confirm("Clear all fields?")) return;
+
+  localStorage.clear();
+
+  document.querySelectorAll("input, textarea").forEach(el=>{
+    if(el.type === "radio" || el.type === "checkbox"){
+      el.checked = false;
+    } else {
+      el.value = "";
+    }
+  });
+
+  $("patrol").value = `HH:MM — 
+HH:MM — 
+HH:MM — `;
+
+  $("output").value = "";
 }
 
 // ================= COPY =================
