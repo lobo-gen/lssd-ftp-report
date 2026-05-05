@@ -7,6 +7,16 @@
 <!-- FAVICON -->
 <link rel="icon" type="image/png" href="favicon.png">
 
+<!-- THUMB (DISCORD / PREVIEW) -->
+<meta property="og:title" content="LSSD Daily Observation Report">
+<meta property="og:description" content="Generate Daily Observation Reports for LSSD trainees.">
+<meta property="og:image" content="https://lobo-gen.github.io/lssd-ftp-report/ftp.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lobo-gen.github.io/lssd-ftp-report/">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2E3E2B">
+
 <style>
 body {
   font-family: Arial;
@@ -34,6 +44,7 @@ body {
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:20px;
+  margin-bottom:20px; /* FIX DO ESPAÇAMENTO */
 }
 
 /* CARD */
@@ -130,7 +141,6 @@ button:hover {
 
 <div class="section-grid">
 
-<!-- GRADING SYSTEM -->
 <div class="card">
 <h4>Grading System</h4>
 <p><b>S — Superior</b>: Outstanding performance.</p>
@@ -138,17 +148,13 @@ button:hover {
 <p><b>N/I — Needs Improvement</b>: Requires training.</p>
 </div>
 
-<!-- RATING -->
 <div class="card">
 <h4>Overall Performance</h4>
-
 <label class="option"><input type="radio" name="rating" value="S"> S — Superior</label>
 <label class="option"><input type="radio" name="rating" value="C"> C — Competent</label>
 <label class="option"><input type="radio" name="rating" value="N/I"> N/I — Needs Improvement</label>
-
 </div>
 
-<!-- PATROL -->
 <div class="card">
 <h4>Patrol Narrative</h4>
 <textarea id="patrol" rows="6">HH:MM — 
@@ -188,7 +194,7 @@ HH:MM — </textarea>
 <script>
 const $ = id => document.getElementById(id);
 
-// ================= LOCAL STORAGE =================
+// LOCAL STORAGE
 document.querySelectorAll("input, textarea").forEach(el => {
   if (!el.id) return;
 
@@ -213,7 +219,7 @@ document.querySelectorAll('input[type="radio"]').forEach(radio => {
   });
 });
 
-// ================= HELPERS =================
+// HELPERS
 function val(id){
   const el = $(id);
   return el && el.value.trim() ? el.value : "N/A";
@@ -224,7 +230,7 @@ function radio(name){
   return el ? el.value : "N/A";
 }
 
-// ================= GENERATE =================
+// GENERATE
 function generateBBCode(){
 
 const output = `[departmentmanual][divboxheader=black][center]DAILY OBSERVATION REPORT[/center][/divboxheader][divboxcontent=white]
@@ -265,14 +271,14 @@ ${val("report")}
 $("output").value = output;
 }
 
-// ================= CLEAR =================
+// CLEAR
 function clearForm(){
   if(!confirm("Clear all fields?")) return;
 
   localStorage.clear();
 
   document.querySelectorAll("input, textarea").forEach(el=>{
-    if(el.type === "radio" || el.type === "checkbox"){
+    if(el.type === "radio"){
       el.checked = false;
     } else {
       el.value = "";
@@ -286,7 +292,7 @@ HH:MM — `;
   $("output").value = "";
 }
 
-// ================= COPY =================
+// COPY
 function copyBody(){
   const el = $("output");
   el.select();
