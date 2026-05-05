@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>LSSD Daily Observation Report Generator</title>
-
-<link rel="icon" type="image/png" href="favicon.png?v=2">
+<title>LSSD Daily Observation Report</title>
 
 <style>
 body {
@@ -12,9 +10,10 @@ body {
   max-width: 1100px;
   margin: auto;
   background-color: #2E3E2B;
-  color: #fff;
+  color:#fff;
 }
 
+/* HEADER */
 .header {
   display:flex;
   align-items:center;
@@ -22,30 +21,56 @@ body {
   margin:20px 0 30px 0;
   padding-bottom:10px;
   border-bottom:2px solid #556B2F;
+  box-shadow:0 4px 6px rgba(0,0,0,0.3);
 }
 
 .header img { width:65px; }
 
+/* GRID */
 .section-grid {
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:20px;
 }
 
+/* CARD */
 .card {
   background:#fff;
   color:#111;
   padding:12px;
   border-radius:6px;
+  box-shadow:0 4px 6px rgba(0,0,0,0.25);
 }
 
 .full { grid-column: span 3; }
 
+/* INPUTS */
 input, textarea {
   width:100%;
+  max-width:100%;
+  box-sizing:border-box;
   margin-bottom:6px;
+  padding:6px;
+  font-size:13px;
 }
 
+textarea {
+  resize:vertical;
+}
+
+input[type="radio"] {
+  width:auto;
+}
+
+/* OPTIONS (RATINGS) */
+.option {
+  display:flex;
+  align-items:center;
+  gap:6px;
+  margin-bottom:4px;
+}
+
+/* BUTTON */
 button {
   background:#556B2F;
   color:#fff;
@@ -72,36 +97,19 @@ button:hover {
   <h2>LSSD Daily Observation Report</h2>
 </div>
 
-<h3>1. REPORT INFO</h3>
+<h3>REPORT INFORMATION</h3>
 
 <div class="section-grid">
 
 <div class="card">
-<h4>DATE & TIME</h4>
+<h4>Date & Time</h4>
 <input id="date" type="date">
 <input id="time" type="time">
-</div>
-
-<div class="card">
-<h4>PHASE</h4>
 <input id="phase" placeholder="Phase Number">
 </div>
 
 <div class="card">
-<h4>OVERALL RATING</h4>
-<label><input type="radio" name="rating" value="S"> S — Superior</label><br>
-<label><input type="radio" name="rating" value="C"> C — Competent</label><br>
-<label><input type="radio" name="rating" value="N/I"> N/I — Needs Improvement</label>
-</div>
-
-</div>
-
-<h3>2. PERSONNEL</h3>
-
-<div class="section-grid">
-
-<div class="card">
-<h4>TRAINEE</h4>
+<h4>Trainee</h4>
 <input id="traineeName" placeholder="Name">
 <input id="traineeBadge" placeholder="Badge Number">
 </div>
@@ -114,17 +122,39 @@ button:hover {
 
 </div>
 
-<h3>3. NARRATIVES</h3>
+<h3>GRADING</h3>
+
+<div class="section-grid">
+
+<div class="card">
+<h4>Overall Performance</h4>
+
+<label class="option"><input type="radio" name="rating" value="S"> S — Superior</label>
+<label class="option"><input type="radio" name="rating" value="C"> C — Competent</label>
+<label class="option"><input type="radio" name="rating" value="N/I"> N/I — Needs Improvement</label>
+
+</div>
+
+<div class="card full">
+<h4>Grading System</h4>
+<p><b>S — Superior</b>: Outstanding performance.</p>
+<p><b>C — Competent</b>: Meets standard.</p>
+<p><b>N/I — Needs Improvement</b>: Requires further training.</p>
+</div>
+
+</div>
+
+<h3>NARRATIVES</h3>
 
 <div class="section-grid">
 
 <div class="card full">
-<h4>PATROL NARRATIVE</h4>
-<textarea id="patrol" rows="6" placeholder="HH:MM — ..."></textarea>
+<h4>Patrol Narrative</h4>
+<textarea id="patrol" rows="6"></textarea>
 </div>
 
 <div class="card full">
-<h4>REPORT NARRATIVE</h4>
+<h4>Report Narrative</h4>
 <textarea id="report" rows="8"></textarea>
 </div>
 
@@ -132,21 +162,51 @@ button:hover {
 
 <div class="output-area">
 
-<div style="background:#fff; color:#111; padding:12px; border-radius:6px; margin-bottom:15px;">
-<b>Instructions:</b> Fill the form and click the button below to generate your report.
+<div class="card">
+<b>Instructions:</b> Fill out the form, click generate, and send the BBCode to the trainee and forum.
 </div>
 
-<button onclick="generate()">Generate BBCode</button>
+<br>
+
+<button onclick="generateBBCode()">Generate BBCode</button>
 
 <h3>Output</h3>
-<textarea id="output" rows="20"></textarea>
-<button onclick="copyOutput()">Copy</button>
+<textarea id="output" rows="18"></textarea>
+
+<button onclick="copyBody()">Copy</button>
 
 </div>
 
 <script>
 const $ = id => document.getElementById(id);
 
+// ================= LOCAL STORAGE =================
+document.querySelectorAll("input, textarea").forEach(el => {
+  if (!el.id) return;
+
+  const saved = localStorage.getItem(el.id);
+  if (saved !== null) el.value = saved;
+
+  el.addEventListener("input", () => {
+    localStorage.setItem(el.id, el.value);
+  });
+});
+
+// radios
+document.querySelectorAll('input[type="radio"]').forEach(radio => {
+  const name = radio.name;
+
+  const saved = localStorage.getItem(name);
+  if (saved && radio.value === saved) {
+    radio.checked = true;
+  }
+
+  radio.addEventListener("change", () => {
+    localStorage.setItem(name, radio.value);
+  });
+});
+
+// ================= HELPERS =================
 function val(id){
   const el = $(id);
   return el && el.value.trim() ? el.value : "N/A";
@@ -157,87 +217,49 @@ function radio(name){
   return el ? el.value : "N/A";
 }
 
-function generate(){
+// ================= GENERATE =================
+function generateBBCode(){
 
-const output = `[b](([/b] You are obligated to forward this to the trainee's Private Message after each Phase patrol and correctly file it in their file. [b]))[/b]
-[br][/br]
-[departmentmanual][divboxheader=black][center]DAILY OBSERVATION REPORT[/center][/divboxheader][divboxcontent=white]
+const output = `[departmentmanual][divboxheader=black][center]DAILY OBSERVATION REPORT[/center][/divboxheader][divboxcontent=white]
 
 [table]
-[tr]
-[th=black]REPORT DATE[/th]
-[th=black]REPORT TIME[/th]
-[th=black]PHASE NO.[/th]
-[/tr]
-[tr]
-[td]${val("date")}[/td]
-[td]${val("time")}[/td]
-[td]${val("phase")}[/td]
-[/tr]
+[tr][th=black]REPORT DATE[/th][th=black]REPORT TIME[/th][th=black]PHASE NO.[/th][/tr]
+[tr][td]${val("date")}[/td][td]${val("time")}[/td][td]${val("phase")}[/td][/tr]
 [/table]
 
 [br][/br]
 
 [table]
-[tr]
-[th=black]TRAINEE NAME[/th]
-[th=black]BADGE NUMBER[/th]
-[th=black]FTO NAME[/th]
-[th=black]BADGE NUMBER[/th]
-[/tr]
-[tr]
-[td]${val("traineeName")}[/td]
-[td]${val("traineeBadge")}[/td]
-[td]${val("ftoName")}[/td]
-[td]${val("ftoBadge")}[/td]
-[/tr]
+[tr][th=black]TRAINEE NAME[/th][th=black]BADGE NUMBER[/th][th=black]FTO NAME[/th][th=black]BADGE NUMBER[/th][/tr]
+[tr][td]${val("traineeName")}[/td][td]${val("traineeBadge")}[/td][td]${val("ftoName")}[/td][td]${val("ftoBadge")}[/td][/tr]
 [/table]
-
-[br][/br]
-
-[divbox=white]
-[center][b]GRADING SYSTEM[/b][/center]
-[hr]
-[b]S — Superior[/b] — Outstanding performance.
-[b]C — Competent[/b] — Meets standard.
-[b]N/I — Needs Improvement[/b] — Requires training.
-[/divbox]
 
 [br][/br]
 
 [table]
-[tr]
-[th=black][center]GENERAL EVALUATION[/center][/th]
-[th=black][center]RATING[/center][/th]
-[/tr]
-[tr]
-[td]OVERALL TRAINEE PERFORMANCE[/td]
-[td][center]${radio("rating")}[/center][/td]
-[/tr]
+[tr][th=black]GENERAL EVALUATION[/th][th=black]RATING[/th][/tr]
+[tr][td]OVERALL TRAINEE PERFORMANCE[/td][td][center]${radio("rating")}[/center][/td][/tr]
 [/table]
 
 [br][/br]
 
-[divbox=white]
-[center][b]PATROL NARRATIVE[/b][/center]
-[hr]
+[divbox=white][center][b]PATROL NARRATIVE[/b][/center][hr]
 ${val("patrol")}
 [/divbox]
 
 [br][/br]
 
-[divbox=white]
-[center][b]REPORT NARRATIVE[/b][/center]
-[hr]
+[divbox=white][center][b]REPORT NARRATIVE[/b][/center][hr]
 ${val("report")}
 [/divbox]
 
 [/divboxcontent][/departmentmanual]`;
 
-$("output").value = output.trim();
+$("output").value = output;
 }
 
-function copyOutput(){
+// ================= COPY =================
+function copyBody(){
   const el = $("output");
   el.select();
   document.execCommand("copy");
