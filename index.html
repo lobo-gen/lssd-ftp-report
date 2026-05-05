@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>LSSD Daily Observation Report Generator</title>
+
+<link rel="icon" type="image/png" href="favicon.png?v=2">
+
+<style>
+body {
+  font-family: Arial;
+  max-width: 1100px;
+  margin: auto;
+  background-color: #2E3E2B;
+  color: #fff;
+}
+
+.header {
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin:20px 0 30px 0;
+  padding-bottom:10px;
+  border-bottom:2px solid #556B2F;
+}
+
+.header img { width:65px; }
+
+.section-grid {
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+
+.card {
+  background:#fff;
+  color:#111;
+  padding:12px;
+  border-radius:6px;
+}
+
+.full { grid-column: span 3; }
+
+input, textarea {
+  width:100%;
+  margin-bottom:6px;
+}
+
+button {
+  background:#556B2F;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:4px;
+  cursor:pointer;
+}
+
+button:hover {
+  background:#6f8f3a;
+}
+
+.output-area {
+  margin-top:40px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <img src="sheriff.png">
+  <h2>LSSD Daily Observation Report</h2>
+</div>
+
+<h3>1. REPORT INFO</h3>
+
+<div class="section-grid">
+
+<div class="card">
+<h4>DATE & TIME</h4>
+<input id="date" type="date">
+<input id="time" type="time">
+</div>
+
+<div class="card">
+<h4>PHASE</h4>
+<input id="phase" placeholder="Phase Number">
+</div>
+
+<div class="card">
+<h4>OVERALL RATING</h4>
+<label><input type="radio" name="rating" value="S"> S — Superior</label><br>
+<label><input type="radio" name="rating" value="C"> C — Competent</label><br>
+<label><input type="radio" name="rating" value="N/I"> N/I — Needs Improvement</label>
+</div>
+
+</div>
+
+<h3>2. PERSONNEL</h3>
+
+<div class="section-grid">
+
+<div class="card">
+<h4>TRAINEE</h4>
+<input id="traineeName" placeholder="Name">
+<input id="traineeBadge" placeholder="Badge Number">
+</div>
+
+<div class="card">
+<h4>FTO</h4>
+<input id="ftoName" placeholder="Name">
+<input id="ftoBadge" placeholder="Badge Number">
+</div>
+
+</div>
+
+<h3>3. NARRATIVES</h3>
+
+<div class="section-grid">
+
+<div class="card full">
+<h4>PATROL NARRATIVE</h4>
+<textarea id="patrol" rows="6" placeholder="HH:MM — ..."></textarea>
+</div>
+
+<div class="card full">
+<h4>REPORT NARRATIVE</h4>
+<textarea id="report" rows="8"></textarea>
+</div>
+
+</div>
+
+<div class="output-area">
+
+<div style="background:#fff; color:#111; padding:12px; border-radius:6px; margin-bottom:15px;">
+<b>Instructions:</b> Fill the form and click the button below to generate your report.
+</div>
+
+<button onclick="generate()">Generate BBCode</button>
+
+<h3>Output</h3>
+<textarea id="output" rows="20"></textarea>
+<button onclick="copyOutput()">Copy</button>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function val(id){
+  const el = $(id);
+  return el && el.value.trim() ? el.value : "N/A";
+}
+
+function radio(name){
+  const el = document.querySelector(`input[name="${name}"]:checked`);
+  return el ? el.value : "N/A";
+}
+
+function generate(){
+
+const output = `[b](([/b] You are obligated to forward this to the trainee's Private Message after each Phase patrol and correctly file it in their file. [b]))[/b]
+[br][/br]
+[departmentmanual][divboxheader=black][center]DAILY OBSERVATION REPORT[/center][/divboxheader][divboxcontent=white]
+
+[table]
+[tr]
+[th=black]REPORT DATE[/th]
+[th=black]REPORT TIME[/th]
+[th=black]PHASE NO.[/th]
+[/tr]
+[tr]
+[td]${val("date")}[/td]
+[td]${val("time")}[/td]
+[td]${val("phase")}[/td]
+[/tr]
+[/table]
+
+[br][/br]
+
+[table]
+[tr]
+[th=black]TRAINEE NAME[/th]
+[th=black]BADGE NUMBER[/th]
+[th=black]FTO NAME[/th]
+[th=black]BADGE NUMBER[/th]
+[/tr]
+[tr]
+[td]${val("traineeName")}[/td]
+[td]${val("traineeBadge")}[/td]
+[td]${val("ftoName")}[/td]
+[td]${val("ftoBadge")}[/td]
+[/tr]
+[/table]
+
+[br][/br]
+
+[divbox=white]
+[center][b]GRADING SYSTEM[/b][/center]
+[hr]
+[b]S — Superior[/b] — Outstanding performance.
+[b]C — Competent[/b] — Meets standard.
+[b]N/I — Needs Improvement[/b] — Requires training.
+[/divbox]
+
+[br][/br]
+
+[table]
+[tr]
+[th=black][center]GENERAL EVALUATION[/center][/th]
+[th=black][center]RATING[/center][/th]
+[/tr]
+[tr]
+[td]OVERALL TRAINEE PERFORMANCE[/td]
+[td][center]${radio("rating")}[/center][/td]
+[/tr]
+[/table]
+
+[br][/br]
+
+[divbox=white]
+[center][b]PATROL NARRATIVE[/b][/center]
+[hr]
+${val("patrol")}
+[/divbox]
+
+[br][/br]
+
+[divbox=white]
+[center][b]REPORT NARRATIVE[/b][/center]
+[hr]
+${val("report")}
+[/divbox]
+
+[/divboxcontent][/departmentmanual]`;
+
+$("output").value = output.trim();
+}
+
+function copyOutput(){
+  const el = $("output");
+  el.select();
+  document.execCommand("copy");
+}
+</script>
+
+</body>
+</html>
